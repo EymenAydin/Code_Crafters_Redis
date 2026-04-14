@@ -58,6 +58,7 @@ int main() {
 	 if(client!=-1) 	 printf("Client connected\n");
 	 else return 0;
 	 void* command=malloc(sizeof(char)*1024);
+	 char* r_com=(char*)command;
 	 const char* response="+PONG\r\n";
 	 const char* comman="PING";
 	 read(client,command,1023);
@@ -65,6 +66,6 @@ int main() {
 	 if(strcmp(command,comman)==0) send(client,response,strlen(response),0);
 
 	 close(server_fd);
-
-	return 0;
+	 free(command);
+	 return 0;
 }
