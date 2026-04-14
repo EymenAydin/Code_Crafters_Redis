@@ -16,7 +16,8 @@ int main() {
 	printf("Logs from your program will appear here!\n");
 
 
-	 int server_fd, client_addr_len;
+	 int server_fd;
+	 unsigned int client_addr_len;
 	 struct sockaddr_in client_addr;
 
 	 server_fd = socket(AF_INET, SOCK_STREAM, 0);
