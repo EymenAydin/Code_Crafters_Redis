@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -56,10 +57,11 @@ int main() {
 	 int client=accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_len);
 	 if(client!=-1) 	 printf("Client connected\n");
 	 else return 0;
-	 const char[1024] command;
+	 void* command=malloc(sizeof(char)*1024);
 	 const char* response="+PONG\r\n";
 	 const char* comman="PING";
 	 read(client,command,1023);
+
 	 if(strcmp(command,comman)==0) send(client,response,strlen(response),0);
 
 	 close(server_fd);
