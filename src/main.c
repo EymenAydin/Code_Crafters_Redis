@@ -60,7 +60,7 @@ int main() {
 	 void* command=malloc(sizeof(char)*1024);
 	 char* r_com=(char*)command;
 	 const char* response="+PONG\r\n";
-	 const char* comman="PING";
+	 const char* comman="*1\r\n$4\r\nPING\r\n";
 	 read(client,command,1023);
 
 	 if(strcmp(command,comman)==0) send(client,response,strlen(response),0);
