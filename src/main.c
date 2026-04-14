@@ -54,9 +54,13 @@ int main() {
 	 client_addr_len = sizeof(client_addr);
 
 	 int client=accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_len);
-	 printf("Client connected\n");
+	 if(client!=-1) 	 printf("Client connected\n");
+	 else return 0;
+	 const char[1024] command;
 	 const char* response="+PONG\r\n";
-     send(client,response,strlen(response),0);
+	 const char* comman="PING";
+	 read(client,command,1023);
+	 if(strcmp(command,comman)==0) send(client,response,strlen(response),0);
 
 	 close(server_fd);
 
