@@ -60,6 +60,7 @@ int main() {
 	 void* command=malloc(sizeof(char)*1024);
 	 char* r_com=(char*)command;
 	 const char* response="+PONG\r\n";
+	 printf("%lu",sizeof(response));
 	 const char* comman="*1\r\n$4\r\nPING\r\n";
 	 read(client,command,1023);
 
