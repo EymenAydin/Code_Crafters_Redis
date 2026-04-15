@@ -58,14 +58,15 @@ int main() {
 	 if(client!=-1) 	 printf("Client connected\n");
 	 else return 0;
 	 void* command=malloc(sizeof(char)*1024);
-	 char* r_com=(char*)command;
 	 const char* response="+PONG\r\n";
-	 printf("%lu",sizeof(response));
-	 const char* comman="*1\r\n$4\r\nPING\r\n";
+	 const char* command_ex="*1\r\n$4\r\nPING\r\n";
+	 const void* void_comm=(void*)command_ex;
 	 read(client,command,1023);
-
-	 if(strcmp(command,comman)==0) send(client,response,strlen(response),0);
-
+	 void* pos;
+	 while((pos=memmem(command,sizeof(command),void_comm,sizeof(void_comm)))!=NULL){
+		 send(client,response,strlen(response),0);
+		 pos+=sizeof(void_comm);
+	}
 	 close(server_fd);
 	 free(command);
 	 return 0;
