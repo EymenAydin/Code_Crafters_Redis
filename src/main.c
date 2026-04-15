@@ -57,20 +57,24 @@ int main() {
 	 int client=accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_len);
 	 if(client!=-1) 	 printf("Client connected\n");
 	 else return 0;
-	 void* command=malloc(sizeof(char)*1024);
-	 const char* response="+PONG\r\n";
-	 const char* command_ex="*1\r\n$4\r\nPING\r\n";
-	 const void* void_comm=(void*)command_ex;
-	 read(client,command,1023);
-	 void* pos;
-	 uint8_t count=0;
-	 while((pos=memmem(command,sizeof(command),void_comm,sizeof(void_comm)))!=NULL){
-		 send(client,response,strlen(response),0);
-		 pos+=sizeof(void_comm);
-		 count++;
-	}
-	printf("%c",count);
-	 close(server_fd);
-	 free(command);
-	 return 0;
+	 void *command = malloc(sizeof(char) * 1024);
+     const char *response = "+PONG\r\n";
+     const char *command_ex = "*1\r\n$4\r\nPING\r\n";
+     size_t command_ex_len = strlen(command_ex);
+     ssize_t bytes_read;
+
+     while ((bytes_read = read(client, command, 1023)) > 0) {
+         void *search_pos = command;
+         size_t remaining = bytes_read;
+         void *pos;
+         while ((pos = memmem(search_pos, remaining, command_ex, command_ex_len)) != NULL) {
+             send(client, response, strlen(response), 0);
+             remaining =  remaining - ((char *)pos - (char *)search_pos) - command_ex_len;
+             search_pos = (char *)pos + command_ex_len;
+         }
+
+     }
+     close(server_fd);
+     free(command);
+     return 0;
 }
