@@ -63,10 +63,13 @@ int main() {
 	 const void* void_comm=(void*)command_ex;
 	 read(client,command,1023);
 	 void* pos;
+	 uint8_t count=0;
 	 while((pos=memmem(command,sizeof(command),void_comm,sizeof(void_comm)))!=NULL){
 		 send(client,response,strlen(response),0);
 		 pos+=sizeof(void_comm);
+		 count++;
 	}
+	printf("%c",count);
 	 close(server_fd);
 	 free(command);
 	 return 0;
