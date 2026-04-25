@@ -7,6 +7,34 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <pthread.h>
+
+
+void* handle_client(void* arg){
+    int client=*(int*)arg;
+    free(arg);
+    void *command = malloc(sizeof(char) * 1024);
+    const char *response = "+PONG\r\n";
+    const char *command_ex = "*1\r\n$4\r\nPING\r\n";
+    size_t command_ex_len = strlen(command_ex);
+    ssize_t bytes_read;
+
+    while ((bytes_read = read(client, command, 1023)) > 0) {
+        void *search_pos = command;
+        size_t remaining = bytes_read;
+        void *pos;
+        while ((pos = memmem(search_pos, remaining, command_ex, command_ex_len)) != NULL) {
+            send(client, response, strlen(response), 0);
+            remaining =  remaining - ((char *)pos - (char *)search_pos) - command_ex_len;
+            search_pos = (char *)pos + command_ex_len;
+        }
+
+    }
+
+    close(client);
+    free(command);
+    return NULL;
+}
 
 int main() {
 	// Disable output buffering
@@ -53,28 +81,27 @@ int main() {
 
 	 printf("Waiting for a client to connect...\n");
 	 client_addr_len = sizeof(client_addr);
+	 int client;
+	 while(1){
+		 int *client_fd=malloc(sizeof(int));
+		 *client_fd=accept(server_fd,(struct sockaddr*)&client_addr,&client_addr_len);
+		 if(*client_fd==-1){
+			    printf("Accept failed: %s\n", strerror(errno));
+				free(client_fd);
+				continue;
+		 }
 
-	 int client=accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_len);
-	 if(client!=-1) 	 printf("Client connected\n");
-	 else return 0;
-	 void *command = malloc(sizeof(char) * 1024);
-     const char *response = "+PONG\r\n";
-     const char *command_ex = "*1\r\n$4\r\nPING\r\n";
-     size_t command_ex_len = strlen(command_ex);
-     ssize_t bytes_read;
+		 printf("Client connected\n");
+		 pthread_t thread;
+		 if (pthread_create(&thread,NULL,handle_client,client_fd)!=0){
+			    printf("Thread creation failed: %s\n",strerror(errno));
+				close(*client_fd);
+				free(client_fd);
+				continue;
+		}
+		pthread_detach(thread);
+	 }
 
-     while ((bytes_read = read(client, command, 1023)) > 0) {
-         void *search_pos = command;
-         size_t remaining = bytes_read;
-         void *pos;
-         while ((pos = memmem(search_pos, remaining, command_ex, command_ex_len)) != NULL) {
-             send(client, response, strlen(response), 0);
-             remaining =  remaining - ((char *)pos - (char *)search_pos) - command_ex_len;
-             search_pos = (char *)pos + command_ex_len;
-         }
-
-     }
      close(server_fd);
-     free(command);
      return 0;
 }
