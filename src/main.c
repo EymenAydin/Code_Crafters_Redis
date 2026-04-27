@@ -85,7 +85,7 @@ char* response(char* command){
         res_str = "+PONG";
         resp=malloc(sizeof(char)*9);
         char* pos=resp; memcpy(pos,"+",1); pos+=1;
-        memcpy(pos,commands[1],5); pos+=5;
+        memcpy(pos,res_str,5); pos+=5;
         memcpy(pos,"\r\n",2);  resp[8]='\0';
     }
 
