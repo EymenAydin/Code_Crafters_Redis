@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,31 +9,99 @@
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <math.h>
 
+const char* COMMANDS[]={"echo","ping"};
 
+int str_cmp(char* str1,const char* str2){
+    if(strlen(str1)!=strlen(str2)) return 0;
+    int a=0; int b=0;
+    for(;str1[a]!='\0';a++,b++){
+        if(tolower(str1[a])!=tolower(str2[b])) return 0;
+    }
+    return 1;
+}
+char** command_parser(char* command,int* commands_in_size){
+    char* pos=strchr(command,'*');
+    if(!pos) return NULL;
+    char* end_ptr;
+    int commands_size=strtol(pos+1,&end_ptr,10);
+    if(commands_size<0) return NULL;
+    char** commands=malloc(sizeof(char*)*commands_size);
+    if(commands==NULL) return NULL;
+    int command_size=0;
+    for(int i=0;i<commands_size;i++){
+        pos=strchr(pos,'$');
+        if(!pos) goto fail; pos+=1;
+        command_size=strtol(pos,&end_ptr,10);
+        commands[i]=malloc(sizeof(char)*(command_size+1));
+        if(!commands[i]) goto fail;
+        pos=strstr(pos,"\r\n"); if(!pos) goto fail; pos=pos+2;
+        strncpy(commands[i], pos, command_size);
+        commands[i][command_size]='\0';
+        pos=pos+command_size+2;
+    }
+    *commands_in_size=commands_size;
+    return commands;
+
+fail :
+    for(int j=0;j< commands_size;j++) free(commands[j]);
+    free(commands);
+    return NULL;
+}
+int command_rec(char* command){
+    if(str_cmp(command,COMMANDS[0])==1) return 1;
+    else if(str_cmp(command,COMMANDS[1])==1) return 2;
+    else return 0;
+}
+char* response(char* command){
+    int size=0;
+    char** commands=command_parser(command,&size);
+    if (!commands || size == 0) return NULL;
+    char* res_str;
+    int cmd = command_rec(commands[0]);
+        if (cmd == 1 && size > 1)   res_str = commands[1];
+        else if (cmd == 2)          res_str = "+PONG";
+
+    int length_i = strlen(res_str);
+    int digits = (length_i == 0) ? 1 : (int)log10(length_i) + 1;
+    int resp_size = length_i + digits + 6;
+
+    char* resp=malloc(sizeof(char)*resp_size);
+    resp[0]='$'; char* pos=resp+1;
+    snprintf(pos,digits+1,"%d",length_i); pos=pos+digits;
+    memcpy(pos,"\r\n",2); pos+=2;
+    memcpy(pos,res_str,length_i); pos=pos+length_i;
+    memcpy(pos,"\r\n",2);
+    resp[resp_size-1]='\0';
+    for(int i=0;i<size;i++){
+        free(commands[i]);
+    }
+    free(commands);
+    return resp;
+}
+/*void *search_pos = command;
+size_t remaining = bytes_read;
+void *pos;
+while ((pos = memmem(search_pos, remaining, command_ex, command_ex_len)) != NULL) {
+    send(client, response, strlen(response), 0);
+    remaining =  remaining - ((char *)pos - (char *)search_pos) - command_ex_len;
+    search_pos = (char *)pos + command_ex_len;
+} */
 void* handle_client(void* arg){
     int client=*(int*)arg;
     free(arg);
-    void *command = malloc(sizeof(char) * 1024);
-    const char *response = "+PONG\r\n";
-    const char *command_ex = "*1\r\n$4\r\nPING\r\n";
-    size_t command_ex_len = strlen(command_ex);
+    char *command = malloc(sizeof(char) * 1024);
     ssize_t bytes_read;
-
     while ((bytes_read = read(client, command, 1023)) > 0) {
-        void *search_pos = command;
-        size_t remaining = bytes_read;
-        void *pos;
-        while ((pos = memmem(search_pos, remaining, command_ex, command_ex_len)) != NULL) {
-            send(client, response, strlen(response), 0);
-            remaining =  remaining - ((char *)pos - (char *)search_pos) - command_ex_len;
-            search_pos = (char *)pos + command_ex_len;
-        }
-
+        command[bytes_read]='\0';
+        char* resp=response(command);
+        send(client, resp, strlen(resp), 0);
+        free(resp);
     }
 
-    close(client);
     free(command);
+    close(client);
     return NULL;
 }
 
@@ -75,7 +144,7 @@ int main() {
 
 	 int connection_backlog = 5;
 	 if (listen(server_fd, connection_backlog) != 0) {
-	 	printf("Listen failed: %s \n", strerror(errno));
+	 	printf("Listen fax  iled: %s \n", strerror(errno));
 	 	return 1;
 	 }
 
