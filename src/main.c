@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-const char* COMMANDS[]={"echo","ping"};
+const char* COMMANDS[]={"echo","PING"};
 
 
 int count_of_digits(int n){
