@@ -81,11 +81,9 @@ char* response(char* command){
         resp[resp_size-1]='\0';
     }
     else if (cmd == 2){
-        res_str = "PONG";
         resp=malloc(sizeof(char)*9);
-        char* pos=resp; memcpy(pos,"+",1); pos+=1;
-        memcpy(pos,res_str,5); pos+=5;
-        memcpy(pos,"\r\n",2);  resp[8]='\0';
+        memcpy(resp,"+PONG\r\n",7);
+        resp[7]='\0';
     }
 
 
