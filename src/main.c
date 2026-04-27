@@ -9,10 +9,17 @@
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <math.h>
 
 const char* COMMANDS[]={"echo","ping"};
 
+
+int count_of_digits(int n){
+    if(n==1){
+        return 1;
+    }else{
+        return 1+count_of_digits(n/10);
+    }
+}
 int str_cmp(char* str1,const char* str2){
     if(strlen(str1)!=strlen(str2)) return 0;
     int a=0; int b=0;
@@ -64,7 +71,7 @@ char* response(char* command){
         else if (cmd == 2)          res_str = "+PONG";
 
     int length_i = strlen(res_str);
-    int digits = (length_i == 0) ? 1 : (int)log10(length_i) + 1;
+    int digits = (length_i == 0) ? 1 : count_of_digits(length_i);
     int resp_size = length_i + digits + 6;
 
     char* resp=malloc(sizeof(char)*resp_size);
