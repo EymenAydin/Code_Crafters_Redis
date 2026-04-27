@@ -64,6 +64,7 @@ int command_rec(char* command){
 char* response(char* command){
     int size=0;
     char** commands=command_parser(command,&size);
+    /*
     if (!commands || size == 0) return NULL;
     char* res_str;
     int cmd = command_rec(commands[0]);
@@ -81,20 +82,17 @@ char* response(char* command){
     memcpy(pos,res_str,length_i); pos=pos+length_i;
     memcpy(pos,"\r\n",2);
     resp[resp_size-1]='\0';
+    */
+    int resp_size=strlen(commands[1]);
+    char* resp=malloc(sizeof(char)*(resp_size+1));
+    memcpy(resp,commands[1],resp_size); resp[resp_size]='\0';
     for(int i=0;i<size;i++){
         free(commands[i]);
     }
     free(commands);
     return resp;
 }
-/*void *search_pos = command;
-size_t remaining = bytes_read;
-void *pos;
-while ((pos = memmem(search_pos, remaining, command_ex, command_ex_len)) != NULL) {
-    send(client, response, strlen(response), 0);
-    remaining =  remaining - ((char *)pos - (char *)search_pos) - command_ex_len;
-    search_pos = (char *)pos + command_ex_len;
-} */
+
 void* handle_client(void* arg){
     int client=*(int*)arg;
     free(arg);
