@@ -64,30 +64,38 @@ int command_rec(char* command){
 char* response(char* command){
     int size=0;
     char** commands=command_parser(command,&size);
-    /*
     if (!commands || size == 0) return NULL;
-    char* res_str;
+    char* res_str; char* resp;
     int cmd = command_rec(commands[0]);
-        if (cmd == 1 && size > 1)   res_str = commands[1];
-        else if (cmd == 2)          res_str = "+PONG";
+    if (cmd == 1 && size > 1){
+        res_str = commands[1];
+        int length_i = strlen(res_str);
+        int digits = (length_i == 0) ? 1 : count_of_digits(length_i);
+        int resp_size = length_i + digits + 6;
+        resp=malloc(sizeof(char)*resp_size);
+        resp[0]='$'; char* pos=resp+1;
+        snprintf(pos,digits+1,"%d",length_i); pos=pos+digits;
+        memcpy(pos,"\r\n",2); pos+=2;
+        memcpy(pos,res_str,length_i); pos=pos+length_i;
+        memcpy(pos,"\r\n",2);
+        resp[resp_size-1]='\0';
+    }
+    else if (cmd == 2){
+        res_str = "+PONG";
+        char* resp=malloc(sizeof(char)*9);
+        char* pos=resp; memcpy(pos,"+",1); pos+=1;
+        memcpy(pos,commands[1],5); pos+=5;
+        memcpy(pos,"\r\n",2);  resp[8]='\0';
+    }
 
-    int length_i = strlen(res_str);
-    int digits = (length_i == 0) ? 1 : count_of_digits(length_i);
-    int resp_size = length_i + digits + 6;
 
-    char* resp=malloc(sizeof(char)*resp_size);
-    resp[0]='$'; char* pos=resp+1;
-    snprintf(pos,digits+1,"%d",length_i); pos=pos+digits;
-    memcpy(pos,"\r\n",2); pos+=2;
-    memcpy(pos,res_str,length_i); pos=pos+length_i;
-    memcpy(pos,"\r\n",2);
-    resp[resp_size-1]='\0';
-    */
+    /*
     int resp_size=strlen(commands[1]);
     char* resp=malloc(sizeof(char)*(resp_size+5));
     char* pos=resp; memcpy(pos,"+",1); pos+=1;
     memcpy(pos,commands[1],resp_size); pos+=resp_size;
     memcpy(pos,"\r\n",2);  resp[resp_size+4]='\0';
+    */
     for(int i=0;i<size;i++){
         free(commands[i]);
     }
