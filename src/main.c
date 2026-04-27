@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-const char* COMMANDS[]={"echo","PING"};
+const char* COMMANDS[]={"echo","ping"};
 
 
 int count_of_digits(int n){
@@ -82,7 +82,7 @@ char* response(char* command){
     }
     else if (cmd == 2){
         res_str = "+PONG";
-        char* resp=malloc(sizeof(char)*9);
+        resp=malloc(sizeof(char)*9);
         char* pos=resp; memcpy(pos,"+",1); pos+=1;
         memcpy(pos,commands[1],5); pos+=5;
         memcpy(pos,"\r\n",2);  resp[8]='\0';
