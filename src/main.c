@@ -84,7 +84,7 @@ char* response(char* command){
     resp[resp_size-1]='\0';
     */
     int resp_size=strlen(commands[1]);
-    char* resp=malloc(sizeof(char)*(resp_size+4));
+    char* resp=malloc(sizeof(char)*(resp_size+5));
     char* pos=resp; memcpy(pos,"+",1); pos+=1;
     memcpy(pos,commands[1],resp_size); pos+=resp_size;
     memcpy(pos,"\r\n",2);  resp[resp_size]='\0';
