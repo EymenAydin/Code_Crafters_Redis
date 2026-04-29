@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define COMMANDS_SIZE 4
-const char* COMMANDS[]={"echo","ping","get","set"};
+const char* COMMANDS[]={"echo","ping","set","get"};
 
 char** command_parser(char* command,int* commands_in_size){
     char* pos=strchr(command,'*');
