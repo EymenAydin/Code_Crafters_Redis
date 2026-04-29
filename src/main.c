@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,89 +8,8 @@
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
-
-const char* COMMANDS[]={"echo","ping","get","set"};
-
-
-int count_of_digits(int n){
-    if(n==0){
-        return 0;
-    }else{
-        return 1+count_of_digits(n/10);
-    }
-}
-int str_cmp(char* str1,const char* str2){
-    if(strlen(str1)!=strlen(str2)) return 0;
-    int a=0; int b=0;
-    for(;str1[a]!='\0';a++,b++){
-        if(tolower(str1[a])!=tolower(str2[b])) return 0;
-    }
-    return 1;
-}
-char** command_parser(char* command,int* commands_in_size){
-    char* pos=strchr(command,'*');
-    if(!pos) return NULL;
-    char* end_ptr;
-    int commands_size=strtol(pos+1,&end_ptr,10);
-    if(commands_size<0) return NULL;
-    char** commands=malloc(sizeof(char*)*commands_size);
-    if(commands==NULL) return NULL;
-    int command_size=0;
-    for(int i=0;i<commands_size;i++){
-        pos=strchr(pos,'$');
-        if(!pos) goto fail; pos+=1;
-        command_size=strtol(pos,&end_ptr,10);
-        commands[i]=malloc(sizeof(char)*(command_size+1));
-        if(!commands[i]) goto fail;
-        pos=strstr(pos,"\r\n"); if(!pos) goto fail; pos=pos+2;
-        strncpy(commands[i], pos, command_size);
-        commands[i][command_size]='\0';
-        pos=pos+command_size+2;
-    }
-    *commands_in_size=commands_size;
-    return commands;
-
-fail :
-    for(int j=0;j< commands_size;j++) free(commands[j]);
-    free(commands);
-    return NULL;
-}
-int command_rec(char* command){
-    if(str_cmp(command,COMMANDS[0])==1) return 1;
-    else if(str_cmp(command,COMMANDS[1])==1) return 2;
-    else return 0;
-}
-char* response(char* command){
-    int size=0;
-    char** commands=command_parser(command,&size);
-    if (!commands || size == 0) return NULL;
-    char* res_str; char* resp;
-    int cmd = command_rec(commands[0]);
-    if (cmd == 1 && size > 1){
-        res_str = commands[1];
-        int length_i = strlen(res_str);
-        int digits = (length_i == 0) ? 1 : count_of_digits(length_i);
-        int resp_size = length_i + digits + 6;
-        resp=malloc(sizeof(char)*resp_size);
-        resp[0]='$'; char* pos=resp+1;
-        snprintf(pos,digits+1,"%d",length_i); pos=pos+digits;
-        memcpy(pos,"\r\n",2); pos+=2;
-        memcpy(pos,res_str,length_i); pos=pos+length_i;
-        memcpy(pos,"\r\n",2);
-        resp[resp_size-1]='\0';
-    }
-    else if (cmd == 2){
-        resp=malloc(sizeof(char)*9);
-        memcpy(resp,"+PONG\r\n",7);
-        resp[7]='\0';
-    }
-
-    for(int i=0;i<size;i++){
-        free(commands[i]);
-    }
-    free(commands);
-    return resp;
-}
+#include "commands.h"
+#include "database.h"
 
 void* handle_client(void* arg){
     int client=*(int*)arg;
@@ -152,7 +70,7 @@ int main() {
 	 	printf("Listen fax  iled: %s \n", strerror(errno));
 	 	return 1;
 	 }
-
+	 list* data_list=create_list();
 	 printf("Waiting for a client to connect...\n");
 	 client_addr_len = sizeof(client_addr);
 	 int client;
@@ -176,6 +94,7 @@ int main() {
 		pthread_detach(thread);
 	 }
 
+	 destroy_list(data_list);
      close(server_fd);
      return 0;
 }
