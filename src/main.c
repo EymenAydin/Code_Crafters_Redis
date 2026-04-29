@@ -11,20 +11,25 @@
 #include "commands.h"
 #include "database.h"
 
+
+typedef struct thread_args{
+    list* data_list;
+    int* client_fd;
+}thread_args;
+
+
 void* handle_client(void* arg){
-    int client=*(int*)arg;
-    free(arg);
+    int client=*(((thread_args*)arg)->client_fd); list* data=((thread_args*)arg)->data_list;
+    free(((thread_args*)arg)->client_fd); free(arg);
     char *command = malloc(sizeof(char) * 1024);
     ssize_t bytes_read;
     while ((bytes_read = read(client, command, 1023)) > 0) {
         command[bytes_read]='\0';
-        char* resp=response(command);
+        char* resp=response(command,data);
         send(client, resp, strlen(resp), 0);
         free(resp);
     }
-
-    free(command);
-    close(client);
+    destroy_list(data); free(command); close(client);
     return NULL;
 }
 
@@ -70,31 +75,31 @@ int main() {
 	 	printf("Listen fax  iled: %s \n", strerror(errno));
 	 	return 1;
 	 }
-	 list* data_list=create_list();
 	 printf("Waiting for a client to connect...\n");
 	 client_addr_len = sizeof(client_addr);
 	 int client;
 	 while(1){
-		 int *client_fd=malloc(sizeof(int));
+		 int* client_fd=malloc(sizeof(int));
 		 *client_fd=accept(server_fd,(struct sockaddr*)&client_addr,&client_addr_len);
 		 if(*client_fd==-1){
 			    printf("Accept failed: %s\n", strerror(errno));
 				free(client_fd);
 				continue;
 		 }
-
+         thread_args* args=malloc(sizeof(thread_args));
+		 args->data_list=create_list();
+	 	 args->client_fd=client_fd;
 		 printf("Client connected\n");
 		 pthread_t thread;
-		 if (pthread_create(&thread,NULL,handle_client,client_fd)!=0){
+		 if (pthread_create(&thread,NULL,handle_client,args)!=0){
 			    printf("Thread creation failed: %s\n",strerror(errno));
 				close(*client_fd);
-				free(client_fd);
+				free(client_fd); free(args->data_list); free(args);
 				continue;
 		}
 		pthread_detach(thread);
 	 }
 
-	 destroy_list(data_list);
      close(server_fd);
      return 0;
 }
