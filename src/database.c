@@ -17,7 +17,7 @@ bool add_elem(list* list,const char* key,const char* value){
     new_elem->value=malloc(value_len+1); if(!new_elem->value) return false;  strcpy(new_elem->value,value);
     list->elems[list->size]=new_elem; list->size++;
     if(list->size==list->capacity) list->capacity=list->capacity*2;
-    list->elems=realloc(list->elems,sizeof(elem*)*list->capacity);
+    list->elems=realloc(list->elems,sizeof(elem*)*list->capacity); printf("%ld",get_millis());
     return true;
 }
 
@@ -104,6 +104,7 @@ void* check_expiry(void* arg){
     free(arg);
     for(int i=0;i<expiry_l->size;i++){
         if(expiry_l->elems[i].expiry_time<get_millis()){
+            printf("%ld",get_millis());
             char* key=expiry_l->elems[i].key;
             delete_elem(data_list,key);
             delete_expiry(expiry_l, i); i-=1;
