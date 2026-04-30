@@ -22,7 +22,6 @@ void* handle_client(void* arg){
         free(resp);
     }
     pthread_cancel(thread);pthread_join(thread, NULL);
-    destory_expiry(data_expiry);destroy_list(data);
     free(command); close(client);
     return NULL;
 }
@@ -71,7 +70,7 @@ int main() {
 	 }
 	 printf("Waiting for a client to connect...\n");
 	 client_addr_len = sizeof(client_addr);
-	 int client;
+	 int client; list* list_data=create_list(); ExpiryList* expiry=create_expiry();
 	 while(1){
 		 int* client_fd=malloc(sizeof(int));
 		 *client_fd=accept(server_fd,(struct sockaddr*)&client_addr,&client_addr_len);
@@ -81,8 +80,8 @@ int main() {
 				continue;
 		 }
          thread_args* args=malloc(sizeof(thread_args));
-		 args->data_list=create_list();
-		 args->expiry_l=create_expiry();
+		 args->data_list=list_data;
+		 args->expiry_l=expiry;
 	 	 args->client_fd=client_fd;
 		 printf("Client connected\n");
 		 pthread_t thread;
@@ -94,7 +93,7 @@ int main() {
 		}
 		pthread_detach(thread);
 	 }
-
+	 destroy_list(list_data); destory_expiry(expiry);
      close(server_fd);
      return 0;
 }
