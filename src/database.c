@@ -13,8 +13,8 @@ list* create_list(){
 bool add_elem(list* list,const char* key,const char* value){
     elem* new_elem=malloc(sizeof(elem)); if(!new_elem) return false;
     int key_length=strlen(key); int value_len=strlen(value);
-    new_elem->key=malloc(sizeof(key_length)+1); if(!new_elem->key) return false; strcpy(new_elem->key,key);
-    new_elem->value=malloc(sizeof(value_len)+1); if(!new_elem->value) return false;  strcpy(new_elem->value,value);
+    new_elem->key=malloc(key_length+1); if(!new_elem->key) return false; strcpy(new_elem->key,key);
+    new_elem->value=malloc(value_len+1); if(!new_elem->value) return false;  strcpy(new_elem->value,value);
     list->elems[list->size]=new_elem; list->size++;
     if(list->size==list->capacity) list->capacity=list->capacity*2;
     list->elems=realloc(list->elems,sizeof(elem*)*list->capacity);
@@ -28,7 +28,7 @@ void delete_elem(list* list,char* key){
             to_be_deleted=list->elems[i]; index=i;
         }
     }
-    for(int i=index;i<list->size;i++){
+    for(int i=index;i<list->size-1;i++){
         list->elems[i]=list->elems[i+1];
     }
     list->elems[list->size-1]=NULL; list->size--;
@@ -90,7 +90,7 @@ void add_expiry(ExpiryList* expiry_l,char* key,int waiting){
 
 void delete_expiry(ExpiryList* expiry_l,int index){
     free(expiry_l->elems[index].key);
-    for(int i=index;i<expiry_l->size;i++){
+    for(int i=index;i<expiry_l->size-1;i++){
         expiry_l->elems[i]=expiry_l->elems[i+1];
     }
 
@@ -98,11 +98,12 @@ void delete_expiry(ExpiryList* expiry_l,int index){
 }
 
 void* check_expiry(void* arg){
-    free(arg); usleep(1000);
+    usleep(1000);
     ExpiryList* expiry_l = ((expiry_thread*)arg)->expiry_l;
     list* data_list = ((expiry_thread*)arg)->data_list;
+    free(arg);
     for(int i=0;i<expiry_l->size;i++){
-        if(expiry_l->elems[i].expiry_time>get_millis()){
+        if(expiry_l->elems[i].expiry_time<get_millis()){
             char* key=expiry_l->elems[i].key;
             delete_elem(data_list,key);
             delete_expiry(expiry_l, i); i-=1;
