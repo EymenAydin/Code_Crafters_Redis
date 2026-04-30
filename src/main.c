@@ -18,6 +18,7 @@ void* handle_client(void* arg){
     while ((bytes_read = read(client, command, 1023)) > 0) {
         command[bytes_read]='\0';
         char* resp=response(command,data,data_expiry);
+        printf("%s",resp);
         send(client, resp, strlen(resp), 0);
         free(resp);
     }
