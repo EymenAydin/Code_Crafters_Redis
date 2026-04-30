@@ -98,7 +98,7 @@ void delete_expiry(ExpiryList* expiry_l,int index){
 }
 
 void* check_expiry(void* arg){
-    usleep(1000);
+    usleep(100);
     ExpiryList* expiry_l = ((expiry_thread*)arg)->expiry_l;
     list* data_list = ((expiry_thread*)arg)->data_list;
     free(arg);
