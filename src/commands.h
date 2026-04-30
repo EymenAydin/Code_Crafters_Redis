@@ -6,7 +6,7 @@
 #include "database.h"
 char** command_parser(char*,int*);
 int command_rec(char*);
-char* response(char*,list*);
+char* response(char*,list*,ExpiryList*);
 char* bulk_str(char*);
 char* get(const char*);
 char* set(const char*);
