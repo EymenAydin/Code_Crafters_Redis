@@ -102,7 +102,7 @@ void* check_expiry(void* arg){
     list* data_list = ((expiry_thread*)arg)->data_list;
     free(arg);
     while (1) {
-        usleep(10000); // Sleep 10ms between checks
+        usleep(10000);
         for(int i=0;i<expiry_l->size;i++){
             if(expiry_l->elems[i].expiry_time<get_millis()){
                 printf("%ld",get_millis());
