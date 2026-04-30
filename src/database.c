@@ -45,9 +45,9 @@ bool set_elem(list* list,ExpiryList* expiry_l,const char* key,const char* value,
     }
     if(!found){
         if(!add_elem(list, key, value)) {
-            index=list->size-1;
             return false;
         }
+        index=list->size-1;
     }
     if(ex_flag) add_expiry(expiry_l, list->elems[index]->key , wait_time);
     return true;
@@ -98,16 +98,18 @@ void delete_expiry(ExpiryList* expiry_l,int index){
 }
 
 void* check_expiry(void* arg){
-    usleep(100);
     ExpiryList* expiry_l = ((expiry_thread*)arg)->expiry_l;
     list* data_list = ((expiry_thread*)arg)->data_list;
     free(arg);
-    for(int i=0;i<expiry_l->size;i++){
-        if(expiry_l->elems[i].expiry_time<get_millis()){
-            printf("%ld",get_millis());
-            char* key=expiry_l->elems[i].key;
-            delete_elem(data_list,key);
-            delete_expiry(expiry_l, i); i-=1;
+    while (1) {
+        usleep(10000); // Sleep 10ms between checks
+        for(int i=0;i<expiry_l->size;i++){
+            if(expiry_l->elems[i].expiry_time<get_millis()){
+                printf("%ld",get_millis());
+                char* key=expiry_l->elems[i].key;
+                delete_elem(data_list,key);
+                delete_expiry(expiry_l, i); i-=1;
+            }
         }
     }
     return NULL;
