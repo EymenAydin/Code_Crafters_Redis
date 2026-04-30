@@ -75,8 +75,8 @@ char* response(char* command,list* data_list,ExpiryList* expiry_l){
         case 4:
             gotten=get_elem(data_list,commands[1]);
             if(!gotten){
-            resp=malloc(sizeof(char)*6);
-            strcpy(resp, "$-1\r\n");
+                resp=malloc(sizeof(char)*6);
+                strcpy(resp, "$-1\r\n");
             }else{
                 resp=bulk_str(gotten);
             }
