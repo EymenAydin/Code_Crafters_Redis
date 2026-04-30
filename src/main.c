@@ -1,35 +1,29 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <pthread.h>
-#include "commands.h"
+#include "main.h"
 #include "database.h"
-
-
-typedef struct thread_args{
-    list* data_list;
-    int* client_fd;
-}thread_args;
-
+#include <pthread.h>
 
 void* handle_client(void* arg){
     int client=*(((thread_args*)arg)->client_fd); list* data=((thread_args*)arg)->data_list;
+    ExpiryList* data_expiry=((thread_args*)arg)->expiry_l;
     free(((thread_args*)arg)->client_fd); free(arg);
+    expiry_thread* args=malloc(sizeof(expiry_thread));
+    args->expiry_l=data_expiry; args->data_list=data;
+    pthread_t thread;
+    if(pthread_create(&thread,NULL, check_expiry, args)!=0){
+        printf("Thread creation failed: %s\n",strerror(errno));
+        free(data_expiry); free(data); free(args); close(client);
+    }
     char *command = malloc(sizeof(char) * 1024);
     ssize_t bytes_read;
     while ((bytes_read = read(client, command, 1023)) > 0) {
         command[bytes_read]='\0';
-        char* resp=response(command,data);
+        char* resp=response(command,data,data_expiry);
         send(client, resp, strlen(resp), 0);
         free(resp);
     }
-    destroy_list(data); free(command); close(client);
+    pthread_cancel(thread);pthread_join(thread, NULL);
+    destory_expiry(data_expiry);destroy_list(data);
+    free(command); close(client);
     return NULL;
 }
 
@@ -88,13 +82,14 @@ int main() {
 		 }
          thread_args* args=malloc(sizeof(thread_args));
 		 args->data_list=create_list();
+		 args->expiry_l=create_expiry();
 	 	 args->client_fd=client_fd;
 		 printf("Client connected\n");
 		 pthread_t thread;
 		 if (pthread_create(&thread,NULL,handle_client,args)!=0){
 			    printf("Thread creation failed: %s\n",strerror(errno));
 				close(*client_fd);
-				free(client_fd); free(args->data_list); free(args);
+				free(client_fd); free(args->data_list); free(args->expiry_l); free(args);
 				continue;
 		}
 		pthread_detach(thread);

@@ -6,6 +6,7 @@
 
 #define COMMANDS_SIZE 4
 const char* COMMANDS[]={"echo","ping","set","get"};
+const char* SET_OPTIONS[]={"px"};
 
 char** command_parser(char* command,int* commands_in_size){
     char* pos=strchr(command,'*');
@@ -44,36 +45,47 @@ int command_rec(char* command){
     return 0;
 }
 
-char* response(char* command,list* data_list){
-    int size=0;
+char* response(char* command,list* data_list,ExpiryList* expiry_l){
+    int size=0; char ptr[100]; char* gotten=NULL;
+    bool px_flag=false; int waiting_time; char* end_ptr;
     char** commands=command_parser(command,&size);
     if (!commands || size == 0) return NULL;
     char* resp; int cmd = command_rec(commands[0]);
-    if (cmd == 1 && size > 1){
-        resp= bulk_str(commands[1]);
+    switch(cmd){
+        case 1:
+            if(size>1){
+                resp= bulk_str(commands[1]);
+            }else{
+                resp=malloc(sizeof(char)*6);
+                strcpy(resp, "$-1\r\n");
+            }
+            break;
+        case 2:
+            strcpy(ptr,"PONG"); resp=smp_str("PONG");
+            break;
+        case 3:
+            if(size==5 && str_cmp(commands[3], SET_OPTIONS[0])==1){
+                px_flag=true; waiting_time=strtol(commands[4], &end_ptr,10);
+            }
+            if(!set_elem(data_list,expiry_l, commands[1], commands[2],px_flag,waiting_time)){
+                goto fail;
+            }
+            strcpy(ptr,"OK"); resp=smp_str(ptr);
+            break;
+        case 4:
+            gotten=get_elem(data_list,commands[1]);
+            if(!gotten){
+            resp=malloc(sizeof(char)*6);
+            strcpy(resp, "$-1\r\n");
+            }else{
+                resp=bulk_str(gotten);
+            }
+            break;
+        default:
+            resp=malloc(sizeof(char)*6); strcpy(resp, "$-1\r\n");
+            break;
     }
-    else if (cmd == 2){
-        char ptr[5]; strcpy(ptr,"PONG");
-        resp=smp_str("PONG");
-    }else if (cmd == 3){
-        if(!set_elem(data_list, commands[1], commands[2])){
-            free(commands);
-            destroy_list(data_list);
-        }
-        char ptr[3]; strcpy(ptr,"OK");
-        resp=smp_str(ptr);
-    }else if (cmd==4){
-        char* gotten=get_elem(data_list,commands[1]);
-        if(!gotten){
-           resp=malloc(sizeof(char)*6);
-           strcpy(resp, "$-1\r\n");
-        }else{
-            resp=bulk_str(gotten);
-        }
-    }else{
-
-    }
-
+fail:
     for(int i=0;i<size;i++){
         free(commands[i]);
     }
