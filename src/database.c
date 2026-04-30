@@ -17,7 +17,7 @@ bool add_elem(list* list,const char* key,const char* value){
     new_elem->value=malloc(value_len+1); if(!new_elem->value) return false;  strcpy(new_elem->value,value);
     list->elems[list->size]=new_elem; list->size++;
     if(list->size==list->capacity) list->capacity=list->capacity*2;
-    list->elems=realloc(list->elems,sizeof(elem*)*list->capacity); printf("%ld",get_millis());
+    list->elems=realloc(list->elems,sizeof(elem*)*list->capacity); printf("add %ld",get_millis());
     return true;
 }
 
