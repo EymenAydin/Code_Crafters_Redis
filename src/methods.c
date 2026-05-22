@@ -1,4 +1,4 @@
-#include "methods.h"
+#include "../include/methods.h"
 
 int count_of_digits(int n){
     if(n==0){

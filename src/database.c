@@ -1,7 +1,8 @@
-#include "database.h"
-#include "timing.h"
+#include "../include/database.h"
+#include "../include/timing.h"
 
 
+//Linked Lİst Methods
 
 list* create_list(){
     list* new_list=malloc(sizeof(list));
@@ -71,6 +72,9 @@ void destroy_list(list* list){
 }
 
 
+
+//Expiry List Methods
+
 ExpiryList* create_expiry(){
     ExpiryList* new_expiry=malloc(sizeof(ExpiryList));
     new_expiry->capacity=1; new_expiry->size=0;
@@ -115,9 +119,40 @@ void* check_expiry(void* arg){
     return NULL;
 }
 
-void destory_expiry(ExpiryList* expiry_l){
+void destroy_expiry(ExpiryList* expiry_l){
     for(int i=0;i<expiry_l->size;i++){
         free(expiry_l->elems[i].key);
     }
     free(expiry_l);
+}
+
+
+//Redis List Methods
+
+r_list* create_rlist(){
+    r_list* new_rl=malloc(sizeof(r_list));
+    new_rl->size++; new_rl->back=NULL;
+    return new_rl;
+}
+
+void append_elem(r_list* list,char* elem){
+    r_elem* new_el=malloc(sizeof(r_elem)); new_el->next=NULL;
+    int size=strlen(elem)+1; new_el->key=malloc(sizeof(char)*size);
+    strcpy(new_el->key,elem);
+    if(list->head==NULL) list->head=new_el;
+    else list->back->next=new_el;
+    list->back=new_el; list->size++;
+}
+
+void destroy_rlist(r_list* list){
+    r_elem* iter=list->head; r_elem* temp=NULL;
+    while(iter!=NULL){
+        temp=iter; iter=iter->next;
+        free(temp->key); free(temp);
+    }
+     free(list);
+}
+
+void destroy_rlist_wrapper(void* p){
+    destroy_rlist(*((r_list**)(p)));
 }

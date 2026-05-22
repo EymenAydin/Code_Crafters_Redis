@@ -13,10 +13,10 @@
 #include <pthread.h>
 #include "commands.h"
 #include "database.h"
+#include "map.h"
 
 typedef struct thread_args{
-    ExpiryList* expiry_l;
-    list* data_list;
+    lists* lists;
     int* client_fd;
 }thread_args;
 

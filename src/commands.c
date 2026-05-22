@@ -1,11 +1,9 @@
-#include "commands.h"
-#include "database.h"
-#include "methods.h"
-#include <stdio.h>
-#include <string.h>
+#include "../include/commands.h"
+#include "../include/database.h"
+#include "../include/methods.h"
 
-#define COMMANDS_SIZE 4
-const char* COMMANDS[]={"echo","ping","set","get"};
+#define COMMANDS_SIZE 5
+const char* COMMANDS[]={"echo","ping","set","get","rpush"};
 const char* SET_OPTIONS[]={"px"};
 
 char** command_parser(char* command,int* commands_in_size){
@@ -45,7 +43,9 @@ int command_rec(char* command){
     return 0;
 }
 
-char* response(char* command,list* data_list,ExpiryList* expiry_l){
+char* response(char* command,lists* ls){
+    list* data_list=ls->l; ExpiryList* expiry_l=ls->el;
+    struct hashMap* rlists=ls->rlists; void* result=NULL;
     int size=0; char ptr[100]; char* gotten=NULL;
     bool px_flag=false; int waiting_time; char* end_ptr;
     char** commands=command_parser(command,&size);
@@ -56,8 +56,7 @@ char* response(char* command,list* data_list,ExpiryList* expiry_l){
             if(size>1){
                 resp= bulk_str(commands[1]);
             }else{
-                resp=malloc(sizeof(char)*6);
-                strcpy(resp, "$-1\r\n");
+                resp=null_str();
             }
             break;
         case 2:
@@ -68,6 +67,7 @@ char* response(char* command,list* data_list,ExpiryList* expiry_l){
                 px_flag=true; waiting_time=strtol(commands[4], &end_ptr,10);
             }
             if(!set_elem(data_list,expiry_l, commands[1], commands[2],px_flag,waiting_time)){
+                resp = NULL;
                 goto fail;
             }
             strcpy(ptr,"OK"); resp=smp_str(ptr);
@@ -75,10 +75,28 @@ char* response(char* command,list* data_list,ExpiryList* expiry_l){
         case 4:
             gotten=get_elem(data_list,commands[1]);
             if(!gotten){
-                resp=malloc(sizeof(char)*6);
-                strcpy(resp, "$-1\r\n");
+                resp=null_str();
             }else{
                 resp=bulk_str(gotten);
+            }
+            break;
+        case 5:
+            if((result=search(rlists,commands[1]))!=NULL){
+                if(size==3){
+                   append_elem(((r_list*)result),commands[2]);
+                   int l_size=((r_list*)result)->size;
+                   resp=int_str(l_size);
+                }
+                else{
+                    resp=null_str();
+                }
+            }
+            else{
+                r_list* new_rl=create_rlist();
+                insert(&rlists,commands[1],&new_rl);
+                append_elem(new_rl,commands[2]);
+                int l_size=new_rl->size;
+                resp=int_str(l_size);
             }
             break;
         default:
@@ -90,28 +108,5 @@ fail:
         free(commands[i]);
     }
     free(commands);
-    return resp;
-}
-
-char* bulk_str(char* res_str){
-    int length_i = strlen(res_str);
-    int digits = (length_i == 0) ? 1 : count_of_digits(length_i);
-    int resp_size = length_i + digits + 6;
-    char* resp=malloc(sizeof(char)*resp_size);
-    resp[0]='$'; char* pos=resp+1;
-    snprintf(pos,digits+1,"%d",length_i); pos=pos+digits;
-    memcpy(pos,"\r\n",2); pos+=2;
-    memcpy(pos,res_str,length_i); pos=pos+length_i;
-    memcpy(pos,"\r\n",2);
-    resp[resp_size-1]='\0';
-    return resp;
-}
-
-char* smp_str(const char* msg){
-    int length=strlen(msg);
-    int resp_size=length+4;
-    char* resp=malloc(sizeof(char)*resp_size); char* pos=resp;
-    memcpy(pos++,"+",1); memcpy(pos,msg,length); pos+=length;
-    memcpy(pos,"\r\n\0",3);
     return resp;
 }

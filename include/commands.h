@@ -4,11 +4,18 @@
 #include <string.h>
 #include <stdio.h>
 #include "database.h"
+#include "map.h"
+#include "redis_protocols.h"
+
+typedef struct Lists{
+    list* l;
+    struct hashMap* rlists;
+    ExpiryList* el;
+}lists;
+
 char** command_parser(char*,int*);
 int command_rec(char*);
-char* response(char*,list*,ExpiryList*);
-char* bulk_str(char*);
+char* response(char*,lists*);
 char* get(const char*);
 char* set(const char*);
-char* smp_str(const char*);
 #endif

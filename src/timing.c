@@ -1,4 +1,4 @@
-#include "timing.h"
+#include "../include/timing.h"
 
 int64_t get_millis(){
     struct timespec now;

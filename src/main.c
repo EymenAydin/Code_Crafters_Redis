@@ -1,28 +1,22 @@
-#include "main.h"
-#include "database.h"
+#include "../include/main.h"
+#include "../include/database.h"
 #include <pthread.h>
 
 void* handle_client(void* arg){
-    int client=*(((thread_args*)arg)->client_fd); list* data=((thread_args*)arg)->data_list;
-    ExpiryList* data_expiry=((thread_args*)arg)->expiry_l;
+    int client=*(((thread_args*)arg)->client_fd);
+    lists* sys_lists=((thread_args*)arg)->lists;
     free(((thread_args*)arg)->client_fd); free(arg);
-    expiry_thread* args=malloc(sizeof(expiry_thread));
-    args->expiry_l=data_expiry; args->data_list=data;
-    pthread_t thread;
-    if(pthread_create(&thread,NULL, check_expiry, args)!=0){
-        printf("Thread creation failed: %s\n",strerror(errno));
-        free(data_expiry); free(data); free(args); close(client);
-    }
+    
     char *command = malloc(sizeof(char) * 1024);
     ssize_t bytes_read;
     while ((bytes_read = read(client, command, 1023)) > 0) {
         command[bytes_read]='\0';
-        char* resp=response(command,data,data_expiry);
+        char* resp=response(command,sys_lists);
         printf("%s",resp);
         send(client, resp, strlen(resp), 0);
         free(resp);
     }
-    pthread_cancel(thread);pthread_join(thread, NULL);
+    
     free(command); close(client);
     return NULL;
 }
@@ -71,7 +65,21 @@ int main() {
 	 }
 	 printf("Waiting for a client to connect...\n");
 	 client_addr_len = sizeof(client_addr);
-	 int client; list* list_data=create_list(); ExpiryList* expiry=create_expiry();
+
+	 list* list_data=create_list(); ExpiryList* expiry=create_expiry();
+	 struct hashMap* rlist_hmap=create_hmap(sizeof(r_list*),destroy_rlist_wrapper);
+	 lists* shared_lists=malloc(sizeof(lists));
+	 shared_lists->l=list_data; shared_lists->el=expiry;
+	 shared_lists->rlists=rlist_hmap;
+
+	 expiry_thread* exp_args=malloc(sizeof(expiry_thread));
+	 exp_args->expiry_l=expiry; exp_args->data_list=list_data;
+	 pthread_t exp_thread;
+	 if(pthread_create(&exp_thread,NULL, check_expiry, exp_args)!=0){
+		 printf("Thread creation failed: %s\n",strerror(errno));
+		 return 1;
+	 }
+
 	 while(1){
 		 int* client_fd=malloc(sizeof(int));
 		 *client_fd=accept(server_fd,(struct sockaddr*)&client_addr,&client_addr_len);
@@ -81,20 +89,18 @@ int main() {
 				continue;
 		 }
          thread_args* args=malloc(sizeof(thread_args));
-		 args->data_list=list_data;
-		 args->expiry_l=expiry;
-	 	 args->client_fd=client_fd;
+         args->lists=shared_lists; args->client_fd=client_fd;
 		 printf("Client connected\n");
 		 pthread_t thread;
 		 if (pthread_create(&thread,NULL,handle_client,args)!=0){
 			    printf("Thread creation failed: %s\n",strerror(errno));
 				close(*client_fd);
-				free(client_fd); free(args->data_list); free(args->expiry_l); free(args);
+				free(client_fd); free(args);
 				continue;
 		}
 		pthread_detach(thread);
 	 }
-	 destroy_list(list_data); destory_expiry(expiry);
+
      close(server_fd);
      return 0;
 }
