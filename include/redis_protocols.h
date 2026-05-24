@@ -6,6 +6,7 @@
 #include "string.h"
 #include "methods.h"
 
+char* bulk_arr(char*);
 char* bulk_str(char*);
 char* smp_str(const char*);
 char* int_str(int msg);

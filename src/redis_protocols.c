@@ -1,5 +1,37 @@
 #include "../include/redis_protocols.h"
 
+
+char* bulk_arr(char* res_str){
+    char* token=NULL; int size=0;
+    char** prompts=malloc(sizeof(char*));
+    token = strtok(res_str, " ");
+    while(token != NULL){
+        prompts[size]=token; size++;
+        char** tmp = realloc(prompts, sizeof(char*) * (size+1));
+        if(!tmp){ free(prompts); return NULL; }
+        prompts = tmp;
+        token = strtok(NULL, " ");
+    }
+    int length_prompts=count_of_digits(size); int resp_size=length_prompts+3;
+    char* resp=malloc(sizeof(char)*(length_prompts+4)); char* pos=resp;
+    snprintf(pos,length_prompts+4,"*%d\r\n",size); pos+=length_prompts+3;
+    for(int i = 0; i < size; i++){
+        int len = strlen(prompts[i]);
+        int len_digits = count_of_digits(len);
+        int char_size = len + len_digits + 5;
+        int offset = pos - resp;
+        resp_size += char_size;
+        char* tmp = realloc(resp, sizeof(char) * (resp_size + 1));
+        if(!tmp){ free(resp); free(prompts); return NULL; }
+        resp = tmp;
+        pos = resp + offset;
+        snprintf(pos, char_size + 1, "$%d\r\n%s\r\n", len, prompts[i]);
+        pos += char_size;
+    }
+    resp[resp_size] = '\0';
+    free(prompts); return resp;
+}
+
 char* bulk_str(char* res_str){
     int length_i = strlen(res_str);
     int digits = (length_i == 0) ? 1 : count_of_digits(length_i);

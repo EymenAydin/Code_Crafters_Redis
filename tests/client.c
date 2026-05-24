@@ -9,6 +9,7 @@
 
 #define PORT 6379
 
+
 int main(){
     int status,read_bytes,client_fd=0;
     struct sockaddr_in serv_addr;
@@ -29,19 +30,19 @@ int main(){
         return EXIT_FAILURE;
     }
 
-    char message[1024];
+    char message[1024]; char delim=' ';
     char response[1024]={0};
     while(1){
        printf(">");
        if (fgets(message, sizeof(message), stdin) == NULL) break;
        message[strcspn(message, "\n")] = 0;
-       
-       char* formatted_msg = bulk_str(message);
+
+       char* formatted_msg = bulk_arr(message);
        if(send(client_fd, formatted_msg, strlen(formatted_msg), 0) < 0) {
            free(formatted_msg);
            break;
        }
-       
+
        memset(response, 0, sizeof(response));
        read_bytes=read(client_fd, response, 1023);
        if (read_bytes <= 0) {

@@ -3,8 +3,9 @@
 struct node* create_node(struct hashMap*hmap,char* key,void* value){
     struct node* new_n=malloc(sizeof(struct node));
     int length=strlen(key)+1; new_n->key=malloc(sizeof(char)*length);
+    new_n->value=malloc(hmap->value_size);
     memcpy(new_n->value,value,hmap->value_size);
-    strcpy(new_n->key,key); new_n->value=value; new_n->next=NULL; return new_n;
+    strcpy(new_n->key,key); new_n->next=NULL; return new_n;
 }
 
 struct hashMap* create_hmap(size_t value_size,void destroy_fn(void* elem)){
@@ -17,7 +18,7 @@ struct hashMap* create_hmap(size_t value_size,void destroy_fn(void* elem)){
 }
 
 int hashfunc(struct hashMap* hmap,char* key){
-    unsigned int fnv_prime=0x01000193; int fnv_offset=0x811c9dc5;
+    unsigned int fnv_prime=0x01000193; unsigned int fnv_offset=0x811c9dc5;
     unsigned int hash=fnv_offset;
     for(int i=0;key[i]!='\0';i++){
         hash=hash ^ (unsigned char)key[i];
@@ -41,7 +42,7 @@ void insert(struct hashMap** map,char* key,void* value){
 
 struct hashMap* rehash(struct hashMap* map){
     struct hashMap* new_map=malloc(sizeof(struct hashMap));
-    new_map->capacity=map->capacity*2; new_map->numofElements=map->numofElements;
+    new_map->capacity=map->capacity*2; new_map->numofElements=0;
     new_map->arr=calloc(new_map->capacity,sizeof(struct node*));
     for(int i=0;i<map->capacity;i++){
         struct node* iter=map->arr[i];
@@ -65,10 +66,17 @@ void remove_elem(struct hashMap* map,char* key){
                 prev->next=iter->next;
             }
             to_removed=iter;
+            break;
         }
         prev=iter; iter=iter->next;
     }
-    free(to_removed->key); free(to_removed);
+    if(to_removed){
+        free(to_removed->key);
+        if(map->destroy_value!=NULL) map->destroy_value(to_removed->value);
+        else free(to_removed->value);
+        free(to_removed);
+        map->numofElements--;
+    }
 }
  void* search(struct hashMap* map,char* key){
      int s_index=hashfunc(map,key);
@@ -84,11 +92,12 @@ void remove_elem(struct hashMap* map,char* key){
 
 void destroy(struct hashMap* map){
     struct node* iter=NULL; struct node* temp=NULL;
-    for(int i=0;map->capacity;i++){
+    for(int i=0;i<map->capacity;i++){
         iter=map->arr[i];
         while(iter){
             temp=iter; free(temp->key);
-            map->destroy_value(temp->value);
+            if(map->destroy_value!=NULL) map->destroy_value(temp->value);
+            else free(temp->value);
             free(temp); iter=iter->next;
         }
     }
