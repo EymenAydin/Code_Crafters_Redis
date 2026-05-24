@@ -2,7 +2,7 @@
 #include "../include/timing.h"
 
 
-//Linked Lİst Methods
+//Linked List Methods
 
 list* create_list(){
     list* new_list=malloc(sizeof(list));
@@ -131,7 +131,7 @@ void destroy_expiry(ExpiryList* expiry_l){
 
 r_list* create_rlist(){
     r_list* new_rl=malloc(sizeof(r_list));
-    new_rl->size++; new_rl->back=NULL;
+    new_rl->size=0; new_rl->back=NULL;
     return new_rl;
 }
 
