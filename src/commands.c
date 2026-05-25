@@ -82,9 +82,11 @@ char* response(char* command,lists* ls){
             break;
         case 5:
             if((result=search(rlists,commands[1]))!=NULL){
-                if(size==3){
+                if(size>2){
                    r_list* res_rl=*((r_list**)result);
-                   r_push(res_rl,commands[2]);
+                   for(int i=2;i<size;i++){
+                       r_push(res_rl,commands[i]);
+                   }
                    int l_size=res_rl->size;
                    resp=int_str(l_size);
                 }
@@ -95,7 +97,9 @@ char* response(char* command,lists* ls){
             else{
                 r_list* new_rl=create_rlist();
                 insert(&rlists,commands[1],&new_rl);
-                r_push(new_rl,commands[2]);
+                for(int i=2;i<size;i++){
+                    r_push(new_rl,commands[i]);
+                }
                 int l_size=new_rl->size;
                 resp=int_str(l_size);
             }

@@ -30,7 +30,7 @@ int main(){
         return EXIT_FAILURE;
     }
 
-    char message[1024]; char delim=' ';
+    char message[1024];
     char response[1024]={0};
     while(1){
        printf(">");
