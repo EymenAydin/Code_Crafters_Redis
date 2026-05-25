@@ -129,19 +129,62 @@ void destroy_expiry(ExpiryList* expiry_l){
 
 //Redis List Methods
 
+r_elem* create_elem(char* key){
+    r_elem* new_el=malloc(sizeof(r_elem));
+    int size=strlen(key)+1;
+    new_el->key=malloc(sizeof(char)*size);
+    strcpy(new_el->key,key);
+    return new_el;
+}
+
 r_list* create_rlist(){
     r_list* new_rl=malloc(sizeof(r_list));
-    new_rl->size=0; new_rl->back=NULL;
+    new_rl->size=0; new_rl->back=NULL; new_rl->head=NULL;
     return new_rl;
 }
 
-void append_elem(r_list* list,char* elem){
-    r_elem* new_el=malloc(sizeof(r_elem)); new_el->next=NULL;
-    int size=strlen(elem)+1; new_el->key=malloc(sizeof(char)*size);
-    strcpy(new_el->key,elem);
-    if(list->head==NULL) list->head=new_el;
-    else list->back->next=new_el;
+void r_push(r_list* list,char* elem){
+    r_elem* new_el=create_elem(elem);
+    new_el->next=NULL;
+    if(list->head==NULL){
+       list->head=new_el;
+       new_el->prev=NULL;
+    }
+    else{
+         list->back->next=new_el;
+         new_el->prev=list->back;
+    }
     list->back=new_el; list->size++;
+}
+
+void l_push(r_list* list,char* elem){
+    r_elem* new_el=create_elem(elem);
+    new_el->prev=NULL;
+    if(list->back==NULL){
+        list->back=new_el;
+        new_el->next=NULL;
+    }else{
+        list->head->prev=new_el;
+        new_el->next=list->head;
+    }
+    list->head=new_el; list->size++;
+}
+
+char* r_pop(r_list* list){
+    r_elem* to_be_popped=list->back;
+    list->back=list->back->prev;
+    int el_size=strlen(to_be_popped->key)+1;
+    char* ret_str=malloc(sizeof(char)*el_size); strcpy(ret_str,to_be_popped->key);
+    free(to_be_popped->key); free(to_be_popped);
+    return ret_str;
+}
+
+char* l_pop(r_list* list){
+    r_elem* to_be_popped=list->head;
+    list->head=list->head->next;
+    int el_size=strlen(to_be_popped->key)+1;
+    char* ret_str=malloc(sizeof(char*)*el_size); strcpy(ret_str,to_be_popped->key);
+    free(to_be_popped->key); free(to_be_popped); return ret_str;
 }
 
 void destroy_rlist(r_list* list){

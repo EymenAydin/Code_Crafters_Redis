@@ -28,6 +28,7 @@ typedef struct Linked_List{
 typedef struct RedisElem{
     char* key;
     struct RedisElem* next;
+    struct RedisElem* prev;
 }r_elem;
 
 typedef struct RedisList{
@@ -74,8 +75,12 @@ void destroy_expiry(ExpiryList* expiry_l);
 
 //Redis linked list methods
 
+r_elem* create_elem(char* key);
 r_list* create_rlist();
-void append_elem(r_list* list,char* elem);
+void r_push(r_list* list,char* elem);
+void l_push(r_list* list,char* elem);
+char* r_pop(r_list* list);
+char* l_pop(r_list* list);
 void destroy_rlist(r_list* list);
 
 void destroy_rlist_wrapper(void* p);

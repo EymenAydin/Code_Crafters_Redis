@@ -73,7 +73,7 @@ void remove_elem(struct hashMap* map,char* key){
     if(to_removed){
         free(to_removed->key);
         if(map->destroy_value!=NULL) map->destroy_value(to_removed->value);
-        else free(to_removed->value);
+        free(to_removed->value);
         free(to_removed);
         map->numofElements--;
     }
@@ -94,12 +94,16 @@ void destroy(struct hashMap* map){
     struct node* iter=NULL; struct node* temp=NULL;
     for(int i=0;i<map->capacity;i++){
         iter=map->arr[i];
-        while(iter){
-            temp=iter; free(temp->key);
-            if(map->destroy_value!=NULL) map->destroy_value(temp->value);
-            else free(temp->value);
-            free(temp); iter=iter->next;
+        if(!iter) free(iter);
+        else {
+            while(iter){
+                temp=iter; iter=iter->next; free(temp->key);
+                if(map->destroy_value!=NULL) map->destroy_value(temp->value);
+                free(temp->value);
+                free(temp); 
+            }
         }
     }
+    free(map->arr);
     free(map);
 }

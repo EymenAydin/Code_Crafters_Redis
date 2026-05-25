@@ -83,8 +83,9 @@ char* response(char* command,lists* ls){
         case 5:
             if((result=search(rlists,commands[1]))!=NULL){
                 if(size==3){
-                   append_elem(((r_list*)result),commands[2]);
-                   int l_size=((r_list*)result)->size;
+                   r_list* res_rl=*((r_list**)result);
+                   r_push(res_rl,commands[2]);
+                   int l_size=res_rl->size;
                    resp=int_str(l_size);
                 }
                 else{
@@ -94,7 +95,7 @@ char* response(char* command,lists* ls){
             else{
                 r_list* new_rl=create_rlist();
                 insert(&rlists,commands[1],&new_rl);
-                append_elem(new_rl,commands[2]);
+                r_push(new_rl,commands[2]);
                 int l_size=new_rl->size;
                 resp=int_str(l_size);
             }
