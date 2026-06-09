@@ -2,8 +2,8 @@
 #include "../include/database.h"
 #include "../include/methods.h"
 
-#define COMMANDS_SIZE 7
-const char* COMMANDS[]={"echo","ping","set","get","rpush","lrange","lpush"};
+#define COMMANDS_SIZE 8
+const char* COMMANDS[]={"echo","ping","set","get","rpush","lrange","lpush","llen"};
 const char* SET_OPTIONS[]={"px"};
 
 char** command_parser(char* command,int* commands_in_size){
@@ -88,6 +88,9 @@ char* response(char* command,lists* ls){
             break;
         case 7:
             resp=l_push_comm(rlists,commands, size);
+            break;
+        case 8:
+            resp=l_len(rlists,commands,size);
             break;
         default:
             resp=malloc(sizeof(char)*6); strcpy(resp, "$-1\r\n");

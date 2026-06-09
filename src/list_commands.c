@@ -97,3 +97,14 @@ char* l_push_comm(struct hashMap* rlists,char** commands,int size){
     }
     return resp;
 }
+
+char* l_len(struct hashMap* rlists,char** commands,int size){
+    r_list** result=NULL; char* resp=NULL;
+    if((result=search(rlists,commands[1]))!=NULL){
+        r_list* r_l=*result;
+        resp=int_str(r_l->size);
+    }else{
+        resp=int_str(0);
+    }
+    return resp;
+}
