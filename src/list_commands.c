@@ -34,24 +34,26 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
     if((search_res=search(rlists,commands[1]))!=NULL && size==4){
         result=*((r_list**)search_res); int idxs[2];
         idxs[0]=atoi(commands[2]); idxs[1]=atoi(commands[3]);
-        if(idxs[0]==result->size || idxs[0]>idxs[1]){
+        if(idxs[0]>=result->size){
             resp=bulk_arr(NULL); return resp;
         }
-        for(int i=0;i<2;i++){
-            if(idxs[i]>result->size) idxs[i]=result->size-1;
-            if(idxs[i]<-result->size) idxs[i]=0;
-        }
-        for(int i=0;i<2;i++){
-            if(idxs[i]<0) idxs[i]= result->size + idxs[i] ;
-        }
-        int s=0; int e=0;
 
-        if(idxs[0]<idxs[1]){
-            s=idxs[0]; e=idxs[1];
-        }else{
-            s=idxs[1]; e=idxs[0];
+        for(int i=0;i<2;i++){
+            if(idxs[i]<-result->size)  idxs[i]=0;
+            else if(idxs[i]<0) idxs[i]= result->size + idxs[i] ;
         }
-        int length=e-s + 1;
+
+        if(idxs[0]>idxs[1]){
+            resp=bulk_arr(NULL); return resp;
+        }
+
+        if(idxs[1]>result->size) idxs[1] = result->size-1;
+
+        int s=0;
+
+        if(idxs[0]<idxs[1])    s=idxs[0];
+        else s=idxs[1];
+        int length=abs(idxs[1]-idxs[0]) + 1;
         keys=malloc(sizeof(char*)*length);
         r_elem* iter=result->head;
         for(int i=0;i<s;i++){
