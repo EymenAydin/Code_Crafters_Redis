@@ -32,21 +32,26 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
     void* search_res=NULL; r_list* result=NULL;
     char* resp=NULL; char** keys=NULL;
     if((search_res=search(rlists,commands[1]))!=NULL && size==4){
-        result=*((r_list**)search_res);
-        int st_idx=atoi(commands[2]); int end_idx=atoi(commands[3]);
-        printf("%d %d\n",st_idx,end_idx);
-        if(st_idx==result->size || st_idx>end_idx){
+        result=*((r_list**)search_res); int idxs[2];
+        idxs[0]=atoi(commands[2]); idxs[1]=atoi(commands[3]);
+        if(idxs[0]==result->size || idxs[0]>idxs[1]){
             resp=bulk_arr(NULL); return resp;
         }
-        if(end_idx>result->size) end_idx=result->size-1;
-        int length=end_idx-st_idx + 1;
+        for(int i=0;i<2;i++){
+            if(idxs[i]>result->size) idxs[i]=result->size-1;
+            if(idxs[i]<-result->size) idxs[i]=0;
+        }
+        for(int i=0;i<2;i++){
+            if(idxs[i]<0) idxs[i]= result->size + idxs[i] ;
+        }
+
+        int length=abs(idxs[1]-idxs[0]) + 1;
         keys=malloc(sizeof(char*)*length);
         r_elem* iter=result->head;
-        for(int i=0;i<st_idx;i++){
+        for(int i=0;i<idxs[0];i++){
             iter=iter->next;
         }
         for(int i=0;i<length;i++){
-            printf("%s\n",iter->key);
             keys[i]=malloc(sizeof(char)*strlen(iter->key)+1);
             strcpy(keys[i],iter->key); iter=iter->next;
         }
