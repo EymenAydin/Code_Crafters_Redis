@@ -31,7 +31,7 @@ char* r_push_comm(struct hashMap* rlists,char** commands,int size){
 char* l_range(struct hashMap* rlists,char** commands,int size){
     void* search_res=NULL; r_list* result=NULL;
     char* resp=NULL; char** keys=NULL;
-    if((search_res=search(rlists,commands[1]))!=NULL || size==4){
+    if((search_res=search(rlists,commands[1]))!=NULL && size==4){
         result=*((r_list**)search_res);
         int st_idx=atoi(commands[2]); int end_idx=atoi(commands[3]);
         printf("%d %d\n",st_idx,end_idx);
