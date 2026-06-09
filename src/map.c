@@ -4,7 +4,7 @@ struct node* create_node(struct hashMap*hmap,char* key,void* value){
     struct node* new_n=malloc(sizeof(struct node));
     int length=strlen(key)+1; new_n->key=malloc(sizeof(char)*length);
     new_n->value=malloc(hmap->value_size);
-    memcpy(new_n->value,value,hmap->value_size);
+    memcpy(new_n->value,value,hmap->value_size); free(value);
     strcpy(new_n->key,key); new_n->next=NULL; return new_n;
 }
 
@@ -100,7 +100,7 @@ void destroy(struct hashMap* map){
                 temp=iter; iter=iter->next; free(temp->key);
                 if(map->destroy_value!=NULL) map->destroy_value(temp->value);
                 free(temp->value);
-                free(temp); 
+                free(temp);
             }
         }
     }

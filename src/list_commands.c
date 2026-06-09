@@ -17,8 +17,9 @@ char* r_push_comm(struct hashMap* rlists,char** commands,int size){
         }
     }
     else{
-        r_list* new_rl=create_rlist();
-        insert(&rlists,commands[1],&new_rl);
+        r_list** l_ptr=malloc(sizeof(r_list*));
+        r_list* new_rl=create_rlist(); *l_ptr =new_rl;
+        insert(&rlists,commands[1],l_ptr);
         for(int i=2;i<size;i++){
             r_push(new_rl,commands[i]);
         }
@@ -71,7 +72,7 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
 
 char* l_push_comm(struct hashMap* rlists,char** commands,int size){
     r_list* result=NULL; char* resp=NULL;
-    if((search(rlists,commands[1]))!=NULL){
+    if((result=search(rlists,commands[1]))!=NULL){
         if(size>2){
            r_list* res_rl=*((r_list**)result);
            for(int i=2;i<size;i++){
@@ -85,8 +86,9 @@ char* l_push_comm(struct hashMap* rlists,char** commands,int size){
         }
     }
     else{
-        r_list* new_rl=create_rlist();
-        insert(&rlists,commands[1],&new_rl);
+        r_list** l_ptr=malloc(sizeof(r_list**));
+        r_list* new_rl=create_rlist(); *l_ptr=new_rl;
+        insert(&rlists,commands[1],l_ptr);
         for(int i=2;i<size;i++){
             l_push(new_rl,commands[i]);
         }
