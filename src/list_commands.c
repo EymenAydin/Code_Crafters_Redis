@@ -38,7 +38,7 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
         if(st_idx==result->size || st_idx>end_idx){
             resp=bulk_arr(NULL); return resp;
         }
-        if(end_idx>result->size) end_idx=result->size;
+        if(end_idx>result->size) end_idx=result->size-1;
         int length=end_idx-st_idx + 1;
         keys=malloc(sizeof(char*)*length);
         r_elem* iter=result->head;
