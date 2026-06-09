@@ -109,7 +109,6 @@ void* check_expiry(void* arg){
         usleep(10000);
         for(int i=0;i<expiry_l->size;i++){
             if(expiry_l->elems[i].expiry_time<get_millis()){
-                printf("%ld",get_millis());
                 char* key=expiry_l->elems[i].key;
                 delete_elem(data_list,key);
                 delete_expiry(expiry_l, i); i-=1;

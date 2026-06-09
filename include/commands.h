@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
 #include "database.h"
 #include "map.h"
 #include "redis_protocols.h"
+#include "list_commands.h"
+
 
 typedef struct Lists{
     list* l;
