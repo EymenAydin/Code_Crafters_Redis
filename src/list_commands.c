@@ -44,11 +44,17 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
         for(int i=0;i<2;i++){
             if(idxs[i]<0) idxs[i]= result->size + idxs[i] ;
         }
+        int s=0; int e=0;
 
-        int length=abs(idxs[1]-idxs[0]) + 1;
+        if(idxs[0]<idxs[1]){
+            s=idxs[0]; e=idxs[1];
+        }else{
+            s=idxs[1]; e=idxs[0];
+        }
+        int length=e-s + 1;
         keys=malloc(sizeof(char*)*length);
         r_elem* iter=result->head;
-        for(int i=0;i<idxs[0];i++){
+        for(int i=0;i<s;i++){
             iter=iter->next;
         }
         for(int i=0;i<length;i++){
