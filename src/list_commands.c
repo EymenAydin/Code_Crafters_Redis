@@ -52,6 +52,6 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
         }
         char* ret=bulk_arr2(keys,length);  return ret;
     }else{
-        resp=null_str(); return resp;
+        resp=bulk_arr(NULL); return resp;
     }
 }
