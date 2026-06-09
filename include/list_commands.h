@@ -7,5 +7,6 @@
 
 char* r_push_comm(struct hashMap* r_lists,char** commands,int size);
 char* l_range(struct hashMap* rlists,char** commands,int size);
+char* l_push_comm(struct hashMap* rlists,char** commands,int size);
 
 #endif

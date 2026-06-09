@@ -68,3 +68,30 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
         resp=bulk_arr(NULL); return resp;
     }
 }
+
+char* l_push_comm(struct hashMap* rlists,char** commands,int size){
+    r_list* result=NULL; char* resp=NULL;
+    if((search(rlists,commands[1]))!=NULL){
+        if(size>2){
+           r_list* res_rl=*((r_list**)result);
+           for(int i=2;i<size;i++){
+               l_push(res_rl,commands[i]);
+           }
+           int l_size=res_rl->size;
+           resp=int_str(l_size);
+        }
+        else{
+            resp=null_str();
+        }
+    }
+    else{
+        r_list* new_rl=create_rlist();
+        insert(&rlists,commands[1],&new_rl);
+        for(int i=2;i<size;i++){
+            l_push(new_rl,commands[i]);
+        }
+        int l_size=new_rl->size;
+        resp=int_str(l_size);
+    }
+    return resp;
+}

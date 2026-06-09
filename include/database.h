@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "map.h"
 
+
 // Global Redis Variables
 
 typedef struct Element{
