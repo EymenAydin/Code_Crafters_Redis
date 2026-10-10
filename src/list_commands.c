@@ -2,10 +2,10 @@
 #include <string.h>
 
 char* r_push_comm(struct hashMap* rlists,char** commands,int size){
-    r_list* result=NULL; char* resp=NULL;
+    r_list** result=NULL; char* resp=NULL;
     if((result=search(rlists,commands[1]))!=NULL){
         if(size>2){
-           r_list* res_rl=*((r_list**)result);
+           r_list* res_rl=*(result);
            for(int i=2;i<size;i++){
                r_push(res_rl,commands[i]);
            }
@@ -71,10 +71,10 @@ char* l_range(struct hashMap* rlists,char** commands,int size){
 }
 
 char* l_push_comm(struct hashMap* rlists,char** commands,int size){
-    r_list* result=NULL; char* resp=NULL;
+    r_list** result=NULL; char* resp=NULL;
     if((result=search(rlists,commands[1]))!=NULL){
         if(size>2){
-           r_list* res_rl=*((r_list**)result);
+           r_list* res_rl=*(result);
            for(int i=2;i<size;i++){
                l_push(res_rl,commands[i]);
            }
@@ -105,6 +105,20 @@ char* l_len(struct hashMap* rlists,char** commands,int size){
         resp=int_str(r_l->size);
     }else{
         resp=int_str(0);
+    }
+    return resp;
+}
+
+char* l_pop_comm(struct hashMap* rlists,char** commands,int size){
+    r_list** result=NULL; char* resp=NULL;
+    if((result=search(rlists,commands[1]))!=NULL){
+        r_list* r_l=*result;
+        if(r_l->size==0) resp = null_str();
+        else{
+            char* resp_1= l_pop(r_l);
+            resp=bulk_str(resp_1);
+            free(resp_1);
+        }
     }
     return resp;
 }

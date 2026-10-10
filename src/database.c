@@ -180,9 +180,13 @@ char* r_pop(r_list* list){
 
 char* l_pop(r_list* list){
     r_elem* to_be_popped=list->head;
-    list->head=list->head->next;
-    int el_size=strlen(to_be_popped->key)+1;
-    char* ret_str=malloc(sizeof(char*)*el_size); strcpy(ret_str,to_be_popped->key);
+    if(list->size==1){
+        list->head=NULL; list->back=NULL;
+    }else{
+        list->head=list->head->next; list->head->prev=NULL;
+    }
+    list->size--; int el_size=strlen(to_be_popped->key)+1;
+    char* ret_str=malloc(sizeof(char)*el_size); strcpy(ret_str,to_be_popped->key);
     free(to_be_popped->key); free(to_be_popped); return ret_str;
 }
 
