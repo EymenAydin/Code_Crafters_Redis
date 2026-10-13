@@ -51,5 +51,26 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-build
-vcpkg_installed
+# Local build directories
+/build/
+/cmake-build-*/
+/vcpkg_installed/
+
+# Project-specific generated executables
+/client
+/map_test
+/redis_server
+/test_m
+
+# Crash dumps
+/core
+/core.*
+
+# CMake user files
+CMakeUserPresets.json
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
