@@ -171,8 +171,12 @@ void l_push(r_list* list,char* elem){
 
 char* r_pop(r_list* list){
     r_elem* to_be_popped=list->back;
-    list->back=list->back->prev;
-    int el_size=strlen(to_be_popped->key)+1;
+    if(list->size==1){
+        list->back=NULL; list->back=NULL;
+    }else{
+        list->back=list->back->prev; list->back->next=NULL;
+    }
+    list->size--; int el_size=strlen(to_be_popped->key)+1;
     char* ret_str=malloc(sizeof(char)*el_size); strcpy(ret_str,to_be_popped->key);
     free(to_be_popped->key); free(to_be_popped);
     return ret_str;

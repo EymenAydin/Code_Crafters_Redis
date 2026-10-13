@@ -2,9 +2,7 @@
 #include "../include/database.h"
 #include "../include/methods.h"
 
-#define COMMANDS_SIZE 9
-const char* COMMANDS[]={"echo","ping","set","get","rpush","lrange","lpush","llen","lpop"};
-const char* SET_OPTIONS[]={"px"};
+
 
 char** command_parser(char* command,int* commands_in_size){
     char* pos=strchr(command,'*');
@@ -94,6 +92,9 @@ char* response(char* command,lists* ls){
             break;
         case 9:
             resp=l_pop_comm(rlists, commands, size);
+            break;
+        case 10:
+            resp=r_pop_comm(rlists, commands,size);
             break;
         default:
             resp=malloc(sizeof(char)*6); strcpy(resp, "$-1\r\n");

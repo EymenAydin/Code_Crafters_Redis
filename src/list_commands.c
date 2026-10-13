@@ -110,12 +110,40 @@ char* l_len(struct hashMap* rlists,char** commands,int size){
 }
 
 char* l_pop_comm(struct hashMap* rlists,char** commands,int size){
+    r_list** result=NULL; char* resp=NULL; int num=0;
+    if((result=search(rlists,commands[1]))!=NULL){
+        r_list* r_l=*result;
+        char* in_num=commands[2];
+        if(r_l->size==0) resp = null_str();
+        else{
+            for(int i=0;in_num[i]!='\0';i++){
+                if(!isdigit(in_num[i])){
+                    resp=null_str(); return resp;
+                }
+            }
+            num=atoi(in_num);
+            char** keys=malloc(sizeof(char**)*num);
+            if(num>=r_l->size){
+                   num=r_l->size;
+            }
+            for(int i=0;i<num;i++){
+                keys[i]=l_pop(r_l);
+            }
+
+            resp=bulk_arr2(keys,num);
+        }
+    }
+    return resp;
+}
+
+
+char* r_pop_comm(struct hashMap* rlists,char** commands,int size){
     r_list** result=NULL; char* resp=NULL;
     if((result=search(rlists,commands[1]))!=NULL){
         r_list* r_l=*result;
         if(r_l->size==0) resp = null_str();
         else{
-            char* resp_1= l_pop(r_l);
+            char* resp_1= r_pop(r_l);
             resp=bulk_str(resp_1);
             free(resp_1);
         }

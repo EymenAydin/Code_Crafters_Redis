@@ -9,6 +9,9 @@
 #include "redis_protocols.h"
 #include "list_commands.h"
 
+#define COMMANDS_SIZE 10
+static const char* COMMANDS[]={"echo","ping","set","get","rpush","lrange","lpush","llen","lpop","rpop"};
+static const char* SET_OPTIONS[]={"px"};
 
 typedef struct Lists{
     list* l;
