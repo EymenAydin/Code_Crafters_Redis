@@ -113,9 +113,14 @@ char* l_pop_comm(struct hashMap* rlists,char** commands,int size){
     r_list** result=NULL; char* resp=NULL; int num=0;
     if((result=search(rlists,commands[1]))!=NULL){
         r_list* r_l=*result;
-        char* in_num=commands[2];
         if(r_l->size==0) resp = null_str();
         else{
+            if(size==2){
+                char* key=l_pop(r_l);
+                resp=bulk_str(key);
+                free(key);  return resp;
+            }
+            char* in_num=commands[2];
             for(int i=0;in_num[i]!='\0';i++){
                 if(!isdigit(in_num[i])){
                     resp=null_str(); return resp;
@@ -132,6 +137,8 @@ char* l_pop_comm(struct hashMap* rlists,char** commands,int size){
 
             resp=bulk_arr2(keys,num);
         }
+
+
     }
     return resp;
 }
