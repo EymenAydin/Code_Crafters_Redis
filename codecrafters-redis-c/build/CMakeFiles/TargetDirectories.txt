@@ -1,3 +1,0 @@
-/home/muhammed-eymen-aydin/Masaüstü/codecrafters-redis-c/build/CMakeFiles/redis.dir
-/home/muhammed-eymen-aydin/Masaüstü/codecrafters-redis-c/build/CMakeFiles/edit_cache.dir
-/home/muhammed-eymen-aydin/Masaüstü/codecrafters-redis-c/build/CMakeFiles/rebuild_cache.dir
